@@ -6,17 +6,18 @@ import isAuthorized from "../middleware/authorize";
 
 const router: express.Router = express.Router();
 
-// Define rate limiter: Max 5 requests per minute per IP
+// Define rate limiter: Max 5 requests per minute per IP for security-sensitive admin operations
 const adminRateLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
+  windowMs: 1 * 60 * 1000, // 1 minute window
   max: 5, // Limit each IP to 5 requests per minute
-  message: "Too many requests, please try again later.",
-  headers: true, // Include rate limit info in headers
+  message: { error: "Too many requests, please try again later." }, // Custom response
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable `X-RateLimit-*` headers (deprecated)
 });
 
 /**
  * @route POST /setCustomClaims
- * @description Set custom claims for a user.
+ * @description Set custom claims for a user (Admin only).
  * @security Admin role required.
  */
 router.post(
